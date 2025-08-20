@@ -16,7 +16,7 @@ class Product:
 
 
 class Category:
-    '''Создаем класс категория'''
+    '''Создаем класс Категория'''
     name: str
     description: str
     products: List[Product]
@@ -27,5 +27,5 @@ class Category:
         self.name = name
         self.description = description
         self.products = products
-        Category.category_count += 1 # считаем количество категорий
-        Category.product_count += len(self.products) # считаем количество продуктов
+        Category.category_count += 1  # считаем количество категорий
+        Category.product_count += len(self.products)  # считаем количество продуктов
