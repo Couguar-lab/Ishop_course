@@ -14,8 +14,8 @@ def test_category_initialization(category, product):
     assert category.name == "Смартфоны"
     assert (
         category.description
-        == '''Смартфоны, 
-        как средство не только коммуникации, но и получения дополнительных функций для удобства жизни'''
+        == """Смартфоны, 
+        как средство не только коммуникации, но и получения дополнительных функций для удобства жизни"""
     )
     category.add_product(product)
     assert category.products_list == "Samsung Galaxy S23 Ultra, 10000.0 руб. Остаток: 5 шт."
@@ -96,3 +96,38 @@ def test_price_setter_decrease_reject(monkeypatch, capsys):
     assert product.price == 100.0
     captured = capsys.readouterr()
     assert "Понижение цены отменено" in captured.out
+
+
+def test_product_str():
+    product = Product("Laptop", "High-end laptop", 999.99, 10)
+    assert str(product) == "Laptop, 999.99 руб. Остаток: 10 шт."
+
+
+def test_category_str():
+    category = Category("Electronics", "Gadgets")
+    product1 = Product("Laptop", "High-end", 1000.0, 5)
+    product2 = Product("Phone", "Smartphone", 500.0, 3)
+    category.add_product(product1)
+    category.add_product(product2)
+    assert str(category) == "Electronics, количество продуктов: 8 шт."
+
+
+def test_product_add():
+    product1 = Product("Laptop", "High-end", 100.0, 10)
+    product2 = Product("Phone", "Smartphone", 200.0, 2)
+    result = product1 + product2
+    assert result == (100.0 * 10) + (200.0 * 2)  # 1000 + 400 = 1400
+    with pytest.raises(TypeError):
+        product1 + "not a product"  # Проверка на неверный тип
+
+
+def test_category_iterator():
+    category = Category("Electronics", "Gadgets")
+    product1 = Product("Laptop", "High-end", 1000.0, 5)
+    product2 = Product("Phone", "Smartphone", 500.0, 3)
+    category.add_product(product1)
+    category.add_product(product2)
+    products = [p for p in category]
+    assert len(products) == 2
+    assert products[0].name == "Laptop"
+    assert products[1].name == "Phone"

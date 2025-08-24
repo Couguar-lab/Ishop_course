@@ -55,6 +55,14 @@ class Product:
 
         return cls(name, description, price, quantity)
 
+    def __str__(self) -> str:
+        return f"{self.name}, {self.__price} руб. Остаток: {self.quantity} шт."
+
+    def __add__(self, other) -> float:
+        if not isinstance(other, Product):
+            raise TypeError("Можно складывать только объекты класса Product")
+        return (self.price * self.quantity) + (other.price * other.quantity)
+
 
 class Category:
     """Создаем класс Категория"""
@@ -84,3 +92,27 @@ class Category:
     @property
     def products(self) -> List[Product]:
         return self.__products.copy()
+
+    def __str__(self) -> str:
+        total_quantity = sum(product.quantity for product in self.__products)
+        return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def __iter__(self):
+        """Возвращает итератор по продуктам категории."""
+        return CategoryIterator(self.__products)  # Передаем список напрямую
+
+
+class CategoryIterator:
+    def __init__(self, products):
+        self._products = products  # Принимаем список продуктов
+        self.index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.index >= len(self._products):
+            raise StopIteration
+        product = self._products[self.index]
+        self.index += 1
+        return product
