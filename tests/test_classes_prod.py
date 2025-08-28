@@ -1,6 +1,6 @@
 import pytest
 
-from src.classes_prod import Category, Product
+from src.classes_prod import Category, LawnGrass, Product, Smartphone
 
 
 def test_product_initialization(product):
@@ -131,3 +131,57 @@ def test_category_iterator():
     assert len(products) == 2
     assert products[0].name == "Laptop"
     assert products[1].name == "Phone"
+
+
+def test_smartphone_init():
+    phone = Smartphone("iPhone", "Smartphone", 999.99, 10, efficiency=5.0, model="X", memory=128, color="Silver")
+    assert phone.name == "iPhone"
+    assert phone.price == 999.99
+    assert phone.quantity == 10
+    assert phone.efficiency == 5.0
+    assert phone.model == "X"
+    assert phone.memory == 128
+    assert phone.color == "Silver"
+    assert (
+        str(phone)
+        == "iPhone, 999.99 руб. Остаток: 10 шт. (Модель: X, Память: 128GB, Цвет: Silver, Производительность: 5.0)"
+    )
+
+
+def test_lawn_grass_init():
+    grass = LawnGrass("Green Lawn", "Grass", 19.99, 50, country="USA", germination_period="7 days", color="Green")
+    assert grass.name == "Green Lawn"
+    assert grass.price == 19.99
+    assert grass.quantity == 50
+    assert grass.country == "USA"
+    assert grass.germination_period == "7 days"
+    assert grass.color == "Green"
+    assert str(grass) == "Green Lawn, 19.99 руб. Остаток: 50 шт. (Страна: USA, Прорастание: 7 days, Цвет: Green)"
+
+
+def test_add_same_class():
+    phone1 = Smartphone("iPhone", "Smartphone", 1000.0, 2, efficiency=5.0, model="X", memory=128, color="Silver")
+    phone2 = Smartphone("iPhone", "Smartphone", 1000.0, 3, efficiency=5.0, model="X", memory=128, color="Silver")
+    assert phone1 + phone2 == (1000.0 * 2) + (1000.0 * 3)  # 2000 + 3000 = 5000
+
+
+def test_add_different_classes():
+    phone = Smartphone("iPhone", "Smartphone", 1000.0, 2, efficiency=5.0, model="X", memory=128, color="Silver")
+    grass = LawnGrass("Green Lawn", "Grass", 19.99, 50, country="USA", germination_period=7, color="Green")
+    with pytest.raises(TypeError):
+        phone + grass
+
+
+def test_add_invalid_type():
+    phone = Smartphone("iPhone", "Smartphone", 1000.0, 2, efficiency=5.0, model="X", memory=128, color="Silver")
+    with pytest.raises(TypeError):
+        phone + "not a product"
+
+
+def test_add_product_restriction():
+    category = Category("Electronics", "Gadgets")
+    phone = Smartphone("iPhone", "Smartphone", 1000.0, 2, efficiency=5.0, model="X", memory=128, color="Silver")
+    category.add_product(phone)
+    assert "iPhone" in category.products_list
+    with pytest.raises(TypeError):
+        category.add_product("not a product")

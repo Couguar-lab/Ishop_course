@@ -61,7 +61,43 @@ class Product:
     def __add__(self, other) -> float:
         if not isinstance(other, Product):
             raise TypeError("Можно складывать только объекты класса Product")
+        if type(self) != type(other):
+            raise TypeError(f"Можно складывать только объекты одного класса. {type(self)} != {type(other)}")
         return (self.price * self.quantity) + (other.price * other.quantity)
+
+
+class Smartphone(Product):
+    efficiency: float
+    model: str
+    memory: int
+    color: str
+
+    def __init__(self, name, description, price, quantity, efficiency, model, memory, color):
+        super().__init__(name, description, price, quantity)
+        self.efficiency = float(efficiency)
+        self.model = str(model)
+        self.memory = int(memory)
+        self.color = str(color)
+
+    def __str__(self) -> str:
+        base_str = super().__str__()
+        return f"{base_str} (Модель: {self.model}, Память: {self.memory}GB, Цвет: {self.color}, Производительность: {self.efficiency})"
+
+
+class LawnGrass(Product):
+    country: str
+    germination_period: str
+    color: str
+
+    def __init__(self, name, description, price, quantity, country, germination_period, color):
+        super().__init__(name, description, price, quantity)
+        self.country = str(country)
+        self.germination_period = str(germination_period)
+        self.color = str(color)
+
+    def __str__(self) -> str:
+        base_str = super().__str__()
+        return f"{base_str} (Страна: {self.country}, Прорастание: {self.germination_period}, Цвет: {self.color})"
 
 
 class Category:
@@ -78,10 +114,11 @@ class Category:
         self.__products = []
         Category.category_count += 1  # считаем количество категорий
 
-    def add_product(self, product: Product) -> None:
-        if isinstance(product, Product):
-            self.__products.append(product)
-            Category.product_count += 1  # увеличиваем количество категорий на 1
+    def add_product(self, product) -> None:
+        if not isinstance(product, Product):
+            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
+        self.__products.append(product)
+        Category.product_count += 1  # увеличиваем количество категорий на 1
 
     @property
     def products_list(self) -> str:
