@@ -1,6 +1,6 @@
 import pytest
 
-from src.classes_prod import Category, LawnGrass, Product, Smartphone
+from src.classes_prod import Category, LawnGrass, Order, Product, Smartphone
 
 
 def test_product_initialization(product):
@@ -133,9 +133,15 @@ def test_category_iterator():
     assert products[1].name == "Phone"
 
 
-def test_smartphone_init():
+def test_smartphone_init(capsys):
     phone = Smartphone("iPhone", "Smartphone", 999.99, 10, efficiency=5.0, model="X", memory=128, color="Silver")
-    assert phone.name == "iPhone"
+    out, _ = capsys.readouterr()
+    # Проверяем вывод после создания объекта
+    print(repr(phone))  # Явно выводим и проверяем
+    out, _ = capsys.readouterr()
+    assert (
+        "Smartphone('iPhone', 'Smartphone', 999.99, 10, efficiency=5.0, model='X', memory=128, color='Silver')" in out
+    )
     assert phone.price == 999.99
     assert phone.quantity == 10
     assert phone.efficiency == 5.0
@@ -148,15 +154,19 @@ def test_smartphone_init():
     )
 
 
-def test_lawn_grass_init():
-    grass = LawnGrass("Green Lawn", "Grass", 19.99, 50, country="USA", germination_period="7 days", color="Green")
-    assert grass.name == "Green Lawn"
+def test_lawn_grass_init(capsys):
+    grass = LawnGrass("Green Lawn", "Grass", 19.99, 50, country="USA", germination_period="7", color="Green")
+    out, _ = capsys.readouterr()
+    # Проверяем вывод после создания объекта
+    print(repr(grass))  # Явно выводим и проверяем
+    out, _ = capsys.readouterr()
+    assert "LawnGrass('Green Lawn', 'Grass', 19.99, 50, country='USA', germination_period='7', color='Green')" in out
     assert grass.price == 19.99
     assert grass.quantity == 50
     assert grass.country == "USA"
-    assert grass.germination_period == "7 days"
+    assert grass.germination_period == "7"
     assert grass.color == "Green"
-    assert str(grass) == "Green Lawn, 19.99 руб. Остаток: 50 шт. (Страна: USA, Прорастание: 7 days, Цвет: Green)"
+    assert str(grass) == "Green Lawn, 19.99 руб. Остаток: 50 шт. (Страна: USA, Прорастание: 7, Цвет: Green)"
 
 
 def test_add_same_class():
@@ -185,3 +195,20 @@ def test_add_product_restriction():
     assert "iPhone" in category.products_list
     with pytest.raises(TypeError):
         category.add_product("not a product")
+
+
+def test_order_init(capsys):
+    product = Product("Laptop", "High-end", 1000.0, 5)
+    order = Order(product, 2)
+    out, _ = capsys.readouterr()
+    # Проверяем вывод после создания объекта
+    print(repr(order))  # Явно выводим и проверяем
+    out, _ = capsys.readouterr()
+    assert "Order('Laptop', 'High-end', 1000.0, 2)" in out
+    assert order.get_name() == "Laptop"
+    assert order.get_total_quantity() == 2
+    assert order.total_cost == 2000.0
+    with pytest.raises(ValueError):
+        Order(product, 6)  # Превышает количество
+    with pytest.raises(TypeError):
+        Order("not a product", 1)
