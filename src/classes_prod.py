@@ -1,7 +1,36 @@
+from abc import ABC, abstractmethod
 from typing import List
 
 
-class Product:
+class BaseProduct(ABC):
+
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+
+class MixinInfo:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        repr(self)
+
+    def __repr__(self) -> str:
+        class_name = self.__class__.__name__
+        args = ", ".join(repr(arg) for arg in self._get_init_args())
+        kwargs = ", ".join(f"{k}={repr(v)}" for k, v in self._get_init_kwargs().items())
+        params = ", ".join(filter(None, [args, kwargs]))
+        return f"{class_name}({params})"
+
+    def _get_init_args(self):
+        """Вспомогательный метод для получения аргументов __init__."""
+        return []
+
+    def _get_init_kwargs(self):
+        """Вспомогательный метод для получения именованных аргументов __init__."""
+        return {}
+
+
+class Product(MixinInfo, BaseProduct):
     """Создаем класс Продукт"""
 
     name: str
@@ -14,6 +43,9 @@ class Product:
         self.description = str(description)
         self.__price = float(price)
         self.quantity = int(quantity)
+
+    def _get_init_args(self):
+        return [self.name, self.description, self.__price, self.quantity]
 
     @property
     def price(self) -> float:
@@ -79,6 +111,12 @@ class Smartphone(Product):
         self.memory = int(memory)
         self.color = str(color)
 
+    def _get_init_args(self):
+        return super()._get_init_args()
+
+    def _get_init_kwargs(self):
+        return {"efficiency": self.efficiency, "model": self.model, "memory": self.memory, "color": self.color}
+
     def __str__(self) -> str:
         base_str = super().__str__()
         return f"{base_str} (Модель: {self.model}, Память: {self.memory}GB, Цвет: {self.color}, Производительность: {self.efficiency})"
@@ -94,6 +132,12 @@ class LawnGrass(Product):
         self.country = str(country)
         self.germination_period = str(germination_period)
         self.color = str(color)
+
+    def _get_init_args(self):
+        return super()._get_init_args()
+
+    def _get_init_kwargs(self):
+        return {"country": self.country, "germination_period": self.germination_period, "color": self.color}
 
     def __str__(self) -> str:
         base_str = super().__str__()
@@ -153,3 +197,30 @@ class CategoryIterator:
         product = self._products[self.index]
         self.index += 1
         return product
+
+
+class Order:
+    def __init__(self, product: BaseProduct, quantity: int):
+        if not isinstance(product, BaseProduct):
+            raise TypeError("Продукт должен наследовать BaseProduct")
+        if quantity <= 0 or quantity > product.quantity:
+            raise ValueError("Недопустимое количество")
+        self.product = product
+        self.quantity = int(quantity)
+        self._total_cost = product.price * quantity
+
+    def get_name(self) -> str:
+        return self.product.name
+
+    def get_total_quantity(self) -> int:
+        return self.quantity
+
+    @property
+    def total_cost(self) -> float:
+        return self._total_cost
+
+    def __str__(self) -> str:
+        return f"Заказ: {self.product.name}, Кол-во: {self.quantity}, Итог: {self.total_cost} руб."
+
+    def __repr__(self):
+        return f"Order('{self.product.name}', '{self.product.description}', {self.product.price}, {self.quantity})"
