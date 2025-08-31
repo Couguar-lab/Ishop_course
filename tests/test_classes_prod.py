@@ -1,6 +1,28 @@
 import pytest
 
-from src.classes_prod import Category, LawnGrass, Order, Product, Smartphone
+from src.classes_prod import Category, LawnGrass, Order, Product, Smartphone, ZeroQuantityError
+
+
+def test_category_add_product_zero_quantity(capsys):
+    category = Category("Test", "Test Category")
+    with pytest.raises(ZeroQuantityError):
+        category.add_product(Product("Test", "Test", 100.0, 0))
+    out, _ = capsys.readouterr()
+    assert "Ошибка: Товар с нулевым количеством не может быть добавлен" in out
+    assert "Товар успешно добавлен" not in out
+    assert "Обработка добавления товара завершена" in out
+
+
+def test_category_average_price_empty():
+    category = Category("Test", "Test Category")
+    assert category.average_price() == 0.0
+
+
+def test_category_average_price_with_products():
+    category = Category("Electronics", "Gadgets")
+    category.add_product(Product("Laptop", "High-end", 1000.0, 5))
+    category.add_product(Product("Phone", "Smartphone", 500.0, 3))
+    assert category.average_price() == 750.0
 
 
 def test_product_initialization(product):

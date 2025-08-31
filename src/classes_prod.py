@@ -2,6 +2,12 @@ from abc import ABC, abstractmethod
 from typing import List
 
 
+class ZeroQuantityError(Exception):
+    """Пользовательское исключение для обработки нулевого количества товаров."""
+
+    pass
+
+
 class BaseProduct(ABC):
 
     @abstractmethod
@@ -20,6 +26,11 @@ class MixinInfo:
         kwargs = ", ".join(f"{k}={repr(v)}" for k, v in self._get_init_kwargs().items())
         params = ", ".join(filter(None, [args, kwargs]))
         return f"{class_name}({params})"
+
+    def _format_value(self, value):
+        if isinstance(value, (int, float)):
+            return str(value)
+        return repr(value)
 
     def _get_init_args(self):
         """Вспомогательный метод для получения аргументов __init__."""
@@ -159,9 +170,18 @@ class Category:
         Category.category_count += 1  # считаем количество категорий
 
     def add_product(self, product) -> None:
-        if not isinstance(product, Product):
-            raise TypeError("Можно добавлять только объекты класса Product или его наследников")
-        self.__products.append(product)
+        try:
+            if not isinstance(product, BaseProduct):
+                raise TypeError("Можно добавлять только объекты, наследующие BaseProduct")
+            if product.quantity == 0:
+                raise ZeroQuantityError("Товар с нулевым количеством не может быть добавлен")
+            self.__products.append(product)
+            print("Товар успешно добавлен")
+        except (TypeError, ZeroQuantityError) as e:
+            print(f"Ошибка: {e}")
+            raise
+        finally:
+            print("Обработка добавления товара завершена")
         Category.product_count += 1  # увеличиваем количество категорий на 1
 
     @property
@@ -177,6 +197,12 @@ class Category:
     def __str__(self) -> str:
         total_quantity = sum(product.quantity for product in self.__products)
         return f"{self.name}, количество продуктов: {total_quantity} шт."
+
+    def average_price(self) -> float:
+        if not self.__products:
+            return 0.0
+        total_price = sum(product.price for product in self.__products)
+        return total_price / len(self.__products)
 
     def __iter__(self):
         """Возвращает итератор по продуктам категории."""
